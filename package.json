@@ -6,9 +6,13 @@
   },
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "deploy": "tgcloud push",
     "status": "tgcloud status",
-    "run": "tgcloud run"
+    "run": "tgcloud run",
+    "check-watchlists": "node scripts/check-watchlists.mjs"
   }
 }
