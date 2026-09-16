@@ -41,6 +41,12 @@ async function sendTelegramMessage(text) {
 }
 
 async function main() {
+  if (process.env.TEST_NOTIFY === 'true') {
+    await sendTelegramMessage('🧪 Test notification, triggered manually — if you got this, the send path works end-to-end from GitHub Actions.');
+    console.log('Test notification sent.');
+    return;
+  }
+
   const courses = await checkCourse(SUBJECT, CATALOG, DEFAULT_TERM_ID, fetch);
   const course = courses.find((c) => c.catalog.toUpperCase() === CATALOG);
   if (!course) {
