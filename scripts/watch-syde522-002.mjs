@@ -21,6 +21,43 @@ const SUBJECT = 'SYDE';
 const CATALOG = '522';
 const WATCHED_SECTIONS = ['LEC 002', 'TUT 102']; // both must have room to actually be enrollable
 
+// Copy-pasteable registrar email. Telegram inline-keyboard buttons reject
+// `mailto:` URLs outright (BUTTON_URL_INVALID), and mailto: links inside
+// message text render but don't reliably hand off to a mail client either
+// -- confirmed broken in practice. Code-block formatting (tap-to-copy in
+// Telegram) is the reliable alternative, so each field is copied and
+// pasted by hand instead of relying on a client-side URI handler.
+const REGISTRAR_EMAIL = 'registrar@uwaterloo.ca';
+const EMAIL_SUBJECT = 'Section Change Request – SYDE 522 (LEC 001 to LEC 002), Fall 2026';
+const EMAIL_BODY = `To the Office of the Registrar,
+
+I am currently enrolled in SYDE 522 (Foundations of AI) for the Fall 2026 term and would like to request a section change from LEC 001 to LEC 002 (with the corresponding TUT 102).
+
+Please let me know if you require any further information to process this request. Thank you for your time and assistance.
+
+Sincerely,
+[Your Full Name]
+Student ID: [Your Student ID]`;
+
+function emailBlock() {
+  return [
+    '📧 *Section switch email* (tap each block to copy):',
+    '',
+    '*To:*',
+    '```',
+    REGISTRAR_EMAIL,
+    '```',
+    '*Subject:*',
+    '```',
+    EMAIL_SUBJECT,
+    '```',
+    '*Body:*',
+    '```',
+    EMAIL_BODY,
+    '```',
+  ].join('\n');
+}
+
 const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
 for (const [name, val] of Object.entries({ TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID })) {
@@ -42,7 +79,9 @@ async function sendTelegramMessage(text) {
 
 async function main() {
   if (process.env.TEST_NOTIFY === 'true') {
-    await sendTelegramMessage('🧪 Test notification, triggered manually — if you got this, the send path works end-to-end from GitHub Actions.');
+    await sendTelegramMessage(
+      `🧪 Test notification, triggered manually — if you got this, the send path works end-to-end from GitHub Actions.\n\n${emailBlock()}`
+    );
     console.log('Test notification sent.');
     return;
   }
@@ -70,7 +109,7 @@ async function main() {
   const allOpen = sections.every((s) => s.enrlCap > s.enrlTotal);
   if (allOpen) {
     await sendTelegramMessage(
-      `🚨 *${SUBJECT} ${CATALOG}* — ${WATCHED_SECTIONS.join(' + ')} has room!\n\n${statusLines.join('\n')}\n\nGo grab it in Quest now. (You'll keep getting this every 5 min until it fills or you disable the workflow.)`
+      `🚨 *${SUBJECT} ${CATALOG}* — ${WATCHED_SECTIONS.join(' + ')} has room!\n\n${statusLines.join('\n')}\n\nGo grab it in Quest now. (You'll keep getting this every 5 min until it fills or you disable the workflow.)\n\n${emailBlock()}`
     );
     console.log('Notified.');
   }
